@@ -54,7 +54,7 @@ export function Markdown({ source }: { source: string }) {
                     m[1] === "WARNING" ? "border-warning" : "border-accent"
                   }`}
                 >
-                  <div className="kicker mb-1">{m[1].toLowerCase()}</div>
+                  <div className="kicker mb-1">{(m[1] ?? "note").toLowerCase()}</div>
                   <div className="[&_p]:m-0">{stripMarker(children)}</div>
                 </aside>
               );

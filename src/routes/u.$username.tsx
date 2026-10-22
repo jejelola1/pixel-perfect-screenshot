@@ -63,11 +63,11 @@ function Profile() {
   const { p } = data;
 
   async function toggleFollow() {
-    if (!user) return toast("Sign in to follow authors.");
+    if (!user) return void toast("Sign in to follow authors.");
     const r = isFollowing
       ? await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", p.id)
       : await supabase.from("follows").insert({ follower_id: user.id, following_id: p.id });
-    if (r.error) return toast.error("Couldn't update follow.");
+    if (r.error) return void toast.error("Couldn't update follow.");
     qc.invalidateQueries({ queryKey: ["following"] });
     qc.invalidateQueries({ queryKey: ["profile", username] });
   }

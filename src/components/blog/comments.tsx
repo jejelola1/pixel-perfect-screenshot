@@ -39,10 +39,10 @@ export function Comments({ articleId, enabled }: { articleId: string; enabled: b
   async function post(body: string, parent: string | null) {
     const text = body.trim();
     if (!text) return false;
-    if (text.length > 5000) return toast.error("Comments are limited to 5,000 characters."), false;
-    if (LINK_SPAM.test(text)) return toast.error("That looks like spam — please remove some links."), false;
+    if (text.length > 5000) return void toast.error("Comments are limited to 5,000 characters."), false;
+    if (LINK_SPAM.test(text)) return void toast.error("That looks like spam — please remove some links."), false;
     const { error } = await supabase.from("comments").insert({ article_id: articleId, author_id: user!.id, body: text, parent_id: parent });
-    if (error) return toast.error("Couldn't post your comment."), false;
+    if (error) return void toast.error("Couldn't post your comment."), false;
     qc.invalidateQueries({ queryKey: ["comments", articleId] });
     return true;
   }

@@ -271,12 +271,12 @@ function Actions({ articleId, slug, title, vertical }: { articleId: string; slug
   });
 
   async function toggle(table: "likes" | "bookmarks", on: boolean) {
-    if (!user) return toast("Sign in to " + (table === "likes" ? "like" : "save") + " stories.");
+    if (!user) return void toast("Sign in to " + (table === "likes" ? "like" : "save") + " stories.");
     const q = on
       ? supabase.from(table).delete().eq("article_id", articleId).eq("user_id", user.id)
       : supabase.from(table).insert({ article_id: articleId, user_id: user.id });
     const { error } = await q;
-    if (error) return toast.error("Something went wrong.");
+    if (error) return void toast.error("Something went wrong.");
     if (table === "bookmarks") toast.success(on ? "Removed from your list" : "Saved to your list");
     qc.invalidateQueries({ queryKey: key });
   }

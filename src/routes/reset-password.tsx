@@ -32,11 +32,11 @@ function Reset() {
         className="mt-8 space-y-4"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (pw.length < 8) return toast.error("Use at least 8 characters");
+          if (pw.length < 8) return void toast.error("Use at least 8 characters");
           setBusy(true);
           const { error } = await supabase.auth.updateUser({ password: pw });
           setBusy(false);
-          if (error) return toast.error(error.message);
+          if (error) return void toast.error(error.message);
           toast.success("Password updated");
           navigate({ to: "/dashboard" });
         }}
