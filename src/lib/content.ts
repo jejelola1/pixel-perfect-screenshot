@@ -1,3 +1,4 @@
+import GithubSlugger from "github-slugger";
 import { supabase } from "@/integrations/supabase/client";
 
 export const SITE_NAME = "Blogs";
@@ -25,6 +26,7 @@ export function readingMinutes(md: string) {
 }
 
 export function extractToc(md: string) {
+  const slugger = new GithubSlugger();
   const out: { level: number; text: string; id: string }[] = [];
   let inCode = false;
   for (const line of md.split("\n")) {
@@ -33,7 +35,7 @@ export function extractToc(md: string) {
     const m = /^(#{2,3})\s+(.+)$/.exec(line);
     if (m) {
       const text = m[2].replace(/[*_`]/g, "").trim();
-      out.push({ level: m[1].length, text, id: slugify(text).replace(/-/g, "-") });
+      out.push({ level: m[1].length, text, id: slugger.slug(text) });
     }
   }
   return out;
