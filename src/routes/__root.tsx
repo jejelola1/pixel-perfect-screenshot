@@ -11,7 +11,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import katexCss from "katex/dist/katex.min.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { SiteHeader } from "@/components/blog/site-header";
 import { SiteFooter } from "@/components/blog/site-footer";
@@ -95,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "stylesheet", href: katexCss },
+      { rel: "stylesheet", href: "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "alternate", type: "application/rss+xml", title: "Blogs RSS", href: "/rss.xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
