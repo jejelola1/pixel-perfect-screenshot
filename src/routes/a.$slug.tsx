@@ -129,13 +129,14 @@ function ArticlePage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(articleQuery(slug));
   const progress = useProgress();
+  const id = data?.article.id;
+  const published = data?.article.status === "published";
+  useEffect(() => {
+    if (id && published) supabase.rpc("increment_views", { _article: id });
+  }, [id, published]);
   if (!data) return null;
   const { article: a, related, prev, next } = data;
   const toc = extractToc(a.content);
-
-  useEffect(() => {
-    if (a.status === "published") supabase.rpc("increment_views", { _article: a.id });
-  }, [a.id, a.status]);
 
   return (
     <>
