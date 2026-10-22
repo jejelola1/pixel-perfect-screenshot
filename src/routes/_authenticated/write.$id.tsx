@@ -8,6 +8,7 @@ import {
   Loader2, Minus, Quote, Send, Sigma, Table, Upload, CalendarClock, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { useAuth } from "@/lib/auth";
 import { readingMinutes, slugify, uploadMedia, wordCount } from "@/lib/content";
 import { Markdown } from "@/components/blog/markdown";
@@ -86,7 +87,7 @@ function Editor() {
       if (!d || !user || !article) return false;
       setSaveState("saving");
       const slug = slugify(d.slug || d.title);
-      const patch: Record<string, unknown> = {
+      const patch: TablesUpdate<"articles"> = {
         title: d.title.trim().slice(0, 200),
         subtitle: d.subtitle.trim().slice(0, 300),
         slug,

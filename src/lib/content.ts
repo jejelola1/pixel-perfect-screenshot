@@ -33,7 +33,7 @@ export function extractToc(md: string) {
     if (line.startsWith("```")) inCode = !inCode;
     if (inCode) continue;
     const m = /^(#{2,3})\s+(.+)$/.exec(line);
-    if (m) {
+    if (m && m[1] && m[2]) {
       const text = m[2].replace(/[*_`]/g, "").trim();
       out.push({ level: m[1].length, text, id: slugger.slug(text) });
     }
