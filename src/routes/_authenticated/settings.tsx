@@ -53,11 +53,11 @@ function Settings() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     const p = schema.safeParse(f);
-    if (!p.success) return toast.error(p.error.issues[0].message);
+    if (!p.success) return void toast.error(p.error.issues[0]?.message ?? "Invalid input");
     setBusy(true);
     const { error } = await supabase.from("profiles").update({ ...p.data, avatar_url: avatar, cover_url: cover, website: p.data.website || null }).eq("id", user!.id);
     setBusy(false);
-    if (error) return toast.error(error.code === "23505" ? "That username is taken." : "Couldn't save your profile.");
+    if (error) return void toast.error(error.code === "23505" ? "That username is taken." : "Couldn't save your profile.");
     toast.success("Profile updated");
     refresh();
   }

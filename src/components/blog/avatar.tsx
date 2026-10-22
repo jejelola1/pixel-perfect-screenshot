@@ -4,7 +4,7 @@ export function Avatar({
   size = 32,
 }: {
   name: string;
-  src?: string | null;
+  src?: string | null | undefined;
   size?: number;
 }) {
   const initials = name

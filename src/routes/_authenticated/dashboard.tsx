@@ -47,14 +47,14 @@ function Dashboard() {
   async function create() {
     const slug = `untitled-${crypto.randomUUID().slice(0, 8)}`;
     const { data, error } = await supabase.from("articles").insert({ author_id: user!.id, title: "", slug, status: "draft" }).select("id").single();
-    if (error) return toast.error("Couldn't create a draft.");
+    if (error) return void toast.error("Couldn't create a draft.");
     navigate({ to: "/write/$id", params: { id: data.id } });
   }
 
   async function remove(id: string) {
     if (!confirm("Delete this draft permanently?")) return;
     const { error } = await supabase.from("articles").delete().eq("id", id);
-    if (error) return toast.error("Only drafts can be deleted.");
+    if (error) return void toast.error("Only drafts can be deleted.");
     qc.invalidateQueries({ queryKey: ["mine"] });
   }
 

@@ -14,12 +14,12 @@ export function NewsletterForm({ compact = false }: { compact?: boolean }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = schema.safeParse(email);
-    if (!parsed.success) return toast.error("Enter a valid email address.");
+    if (!parsed.success) return void toast.error("Enter a valid email address.");
     setState("loading");
     const { error } = await supabase.from("newsletter_subscribers").insert({ email: parsed.data.toLowerCase() });
     if (error && error.code !== "23505") {
       setState("idle");
-      return toast.error("Couldn't subscribe right now. Please try again.");
+      return void toast.error("Couldn't subscribe right now. Please try again.");
     }
     setState("done");
   }

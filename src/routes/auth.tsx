@@ -54,7 +54,7 @@ function AuthPage() {
         return;
       }
       const parsed = creds.safeParse({ email, password });
-      if (!parsed.success) throw new Error(parsed.error.issues[0].message);
+      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email: parsed.data.email,

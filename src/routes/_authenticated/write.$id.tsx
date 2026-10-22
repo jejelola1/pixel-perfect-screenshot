@@ -160,8 +160,8 @@ function Editor() {
   }
 
   async function upload(file: File, asCover = false) {
-    if (!file.type.startsWith("image/")) return toast.error("Only images can be uploaded.");
-    if (file.size > 10 * 1024 * 1024) return toast.error("Images must be under 10 MB.");
+    if (!file.type.startsWith("image/")) return void toast.error("Only images can be uploaded.");
+    if (file.size > 10 * 1024 * 1024) return void toast.error("Images must be under 10 MB.");
     const t = toast.loading("Uploading image…");
     try {
       const url = await uploadMedia(user!.id, file);
@@ -174,7 +174,7 @@ function Editor() {
   }
 
   async function submit() {
-    if (!d!.title.trim() || wordCount(d!.content) < 50) return toast.error("Add a title and at least 50 words before submitting.");
+    if (!d!.title.trim() || wordCount(d!.content) < 50) return void toast.error("Add a title and at least 50 words before submitting.");
     setBusy(true);
     const ok = await save({ version: true, status: "submitted" });
     setBusy(false);
@@ -184,7 +184,7 @@ function Editor() {
     }
   }
   async function publish(when?: string) {
-    if (!d!.title.trim()) return toast.error("Add a title first.");
+    if (!d!.title.trim()) return void toast.error("Add a title first.");
     setBusy(true);
     const at = when ? new Date(when).toISOString() : new Date().toISOString();
     const ok = await save({ version: true, status: "published", publishedAt: at });
