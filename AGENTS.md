@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+Admin role changes must use the authenticated `set_admin_role` database function, not direct role writes, so permission checks, self-demotion protection and audit records cannot be bypassed.
+Signup creates ordinary users only; administrator bootstrap requires a verified requester identity to prevent first-signup privilege capture.
+Timed publication uses published status with a future published_at (and scheduled_for for admin visibility); public queries and RLS exclude future timestamps, so content becomes visible at its due time without a scheduler.

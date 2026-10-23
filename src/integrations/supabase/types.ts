@@ -524,6 +524,10 @@ export type Database = {
         Returns: boolean
       }
       increment_views: { Args: { _article: string }; Returns: undefined }
+      set_admin_role: {
+        Args: { make_admin: boolean; target_user: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

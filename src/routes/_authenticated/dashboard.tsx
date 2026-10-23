@@ -13,7 +13,7 @@ import { EmptyState } from "@/components/blog/empty-state";
 import { ArticleRow } from "@/components/blog/article-card";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Blogs" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Blogs" }, { name: "description", content: "Manage your Blogs stories, submissions and reading list." }, { property: "og:title", content: "Dashboard — Blogs" }, { property: "og:description", content: "Your writing dashboard and reading list on Blogs." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: Dashboard,
 });
 
@@ -26,10 +26,11 @@ function Dashboard() {
     queryKey: ["mine", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      if (!user) return [];
       const { data } = await supabase
         .from("articles")
         .select("id, title, slug, status, updated_at, published_at, views, review_note, likes(count)")
-        .eq("author_id", user!.id)
+        .eq("author_id", user.id)
         .order("updated_at", { ascending: false });
       return data ?? [];
     },
@@ -39,14 +40,16 @@ function Dashboard() {
     queryKey: ["saved", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("bookmarks").select(`article:articles(${ARTICLE_CARD_SELECT})`).eq("user_id", user!.id).order("created_at", { ascending: false });
+      if (!user) return [];
+      const { data } = await supabase.from("bookmarks").select(`article:articles(${ARTICLE_CARD_SELECT})`).eq("user_id", user.id).order("created_at", { ascending: false });
       return (data ?? []).map((b) => b.article).filter(Boolean) as unknown as ArticleCard[];
     },
   });
 
   async function create() {
+    if (!user) return;
     const slug = `untitled-${crypto.randomUUID().slice(0, 8)}`;
-    const { data, error } = await supabase.from("articles").insert({ author_id: user!.id, title: "", slug, status: "draft" }).select("id").single();
+    const { data, error } = await supabase.from("articles").insert({ author_id: user.id, title: "", slug, status: "draft" }).select("id").single();
     if (error) return void toast.error("Couldn't create a draft.");
     navigate({ to: "/write/$id", params: { id: data.id } });
   }
@@ -139,7 +142,7 @@ function Dashboard() {
 
 export function StatusBadge({ status, publishedAt }: { status: string; publishedAt?: string | null }) {
   const scheduled = status === "published" && publishedAt && new Date(publishedAt) > new Date();
-  const label = scheduled ? `Scheduled · ${format(new Date(publishedAt!), "MMM d")}` : STATUS_LABEL[status] ?? status;
+  const label = scheduled && publishedAt ? `Scheduled · ${format(new Date(publishedAt), "MMM d")}` : STATUS_LABEL[status] ?? status;
   const variant = status === "published" ? "default" : status === "rejected" ? "destructive" : "secondary";
   return <Badge variant={variant as "default"}>{label}</Badge>;
 }

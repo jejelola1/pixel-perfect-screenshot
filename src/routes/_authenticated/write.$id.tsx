@@ -21,7 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { StatusBadge } from "./dashboard";
 
 export const Route = createFileRoute("/_authenticated/write/$id")({
-  head: () => ({ meta: [{ title: "Editor — Blogs" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Editor — Blogs" }, { name: "description", content: "Write, review and publish your Blogs articles." }, { property: "og:title", content: "Editor — Blogs" }, { property: "og:description", content: "Blogs article editor and publishing controls." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: Editor,
 });
 
@@ -102,7 +102,10 @@ function Editor() {
       // An author editing a rejected story moves it back to draft.
       if (!isAdmin && article.status === "rejected") patch.status = "draft";
       if (opts?.status) patch.status = opts.status;
-      if (opts?.publishedAt !== undefined) patch.published_at = opts.publishedAt;
+      if (opts?.publishedAt !== undefined) {
+        patch.published_at = opts.publishedAt;
+        patch.scheduled_for = opts.publishedAt && new Date(opts.publishedAt) > new Date() ? opts.publishedAt : null;
+      }
       const { error } = await supabase.from("articles").update(patch).eq("id", id);
       if (error) {
         setSaveState("dirty");
@@ -122,6 +125,9 @@ function Editor() {
       setSaveState("saved");
       qc.invalidateQueries({ queryKey: ["edit", id] });
       qc.invalidateQueries({ queryKey: ["versions", id] });
+      qc.invalidateQueries({ queryKey: ["admin-articles"] });
+      qc.invalidateQueries({ queryKey: ["mine"] });
+      qc.invalidateQueries({ queryKey: ["admin-audit"] });
       return true;
     },
     [d, user, article, isAdmin, id, tags, qc],
@@ -143,10 +149,11 @@ function Editor() {
   };
 
   function wrap(before: string, after = before, placeholder = "") {
-    const el = ta.current!;
+    const el = ta.current;
+    if (!el || !d) return;
     const { selectionStart: s, selectionEnd: e } = el;
-    const sel = d!.content.slice(s, e) || placeholder;
-    const next = d!.content.slice(0, s) + before + sel + after + d!.content.slice(e);
+    const sel = d.content.slice(s, e) || placeholder;
+    const next = d.content.slice(0, s) + before + sel + after + d.content.slice(e);
     set({ content: next });
     requestAnimationFrame(() => {
       el.focus();
@@ -154,18 +161,20 @@ function Editor() {
     });
   }
   function line(prefix: string) {
-    const el = ta.current!;
+    const el = ta.current;
+    if (!el || !d) return;
     const s = el.selectionStart;
-    const start = d!.content.lastIndexOf("\n", s - 1) + 1;
-    set({ content: d!.content.slice(0, start) + prefix + d!.content.slice(start) });
+    const start = d.content.lastIndexOf("\n", s - 1) + 1;
+    set({ content: d.content.slice(0, start) + prefix + d.content.slice(start) });
   }
 
   async function upload(file: File, asCover = false) {
+    if (!user) return;
     if (!file.type.startsWith("image/")) return void toast.error("Only images can be uploaded.");
     if (file.size > 10 * 1024 * 1024) return void toast.error("Images must be under 10 MB.");
     const t = toast.loading("Uploading image…");
     try {
-      const url = await uploadMedia(user!.id, file);
+      const url = await uploadMedia(user.id, file);
       if (asCover) set({ cover_url: url });
       else wrap(`![${file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ")}](${url})\n`, "", "");
       toast.success("Image added", { id: t });
@@ -175,7 +184,8 @@ function Editor() {
   }
 
   async function submit() {
-    if (!d!.title.trim() || wordCount(d!.content) < 50) return void toast.error("Add a title and at least 50 words before submitting.");
+    if (!d) return;
+    if (!d.title.trim() || wordCount(d.content) < 50) return void toast.error("Add a title and at least 50 words before submitting.");
     setBusy(true);
     const ok = await save({ version: true, status: "submitted" });
     setBusy(false);
@@ -185,7 +195,9 @@ function Editor() {
     }
   }
   async function publish(when?: string) {
-    if (!d!.title.trim()) return void toast.error("Add a title first.");
+    if (!d) return;
+    if (!d.title.trim()) return void toast.error("Add a title first.");
+    if (when && (!Number.isFinite(new Date(when).getTime()) || new Date(when) <= new Date())) return void toast.error("Choose a future publication time.");
     setBusy(true);
     const at = when ? new Date(when).toISOString() : new Date().toISOString();
     const ok = await save({ version: true, status: "published", publishedAt: at });
@@ -281,9 +293,9 @@ function Editor() {
               />
               <div className="flex flex-wrap gap-0.5 rounded-md border bg-card p-1" role="toolbar" aria-label="Formatting">
                 {tools.map(([Icon, label, fn]) => (
-                  <button key={label} type="button" title={label} aria-label={label} onClick={fn} className="rounded p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                  <Button key={label} type="button" title={label} aria-label={label} onClick={fn} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                     <Icon className="h-4 w-4" />
-                  </button>
+                  </Button>
                 ))}
                 <label title="Upload image" className="cursor-pointer rounded p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
                   <Upload className="h-4 w-4" />
@@ -340,7 +352,7 @@ function Editor() {
               <div className="flex items-center rounded-md border bg-card pl-2 text-xs text-muted-foreground">
                 /a/<input id="slug" value={d.slug} onChange={(e) => set({ slug: e.target.value })} onBlur={() => set({ slug: slugify(d.slug || d.title) })} className="h-9 flex-1 bg-transparent px-1 text-sm text-foreground outline-none" />
               </div>
-              <button type="button" onClick={() => set({ slug: slugify(d.title) })} className="text-xs text-accent">Generate from title</button>
+              <Button type="button" variant="link" size="sm" onClick={() => set({ slug: slugify(d.title) })} className="h-auto p-0 text-xs">Generate from title</Button>
             </div>
             <details className="rounded-md border bg-card p-3">
               <summary className="cursor-pointer font-medium">Search preview</summary>

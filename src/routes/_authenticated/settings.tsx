@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Blogs" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Settings — Blogs" }, { name: "description", content: "Update your Blogs author profile, images and social links." }, { property: "og:title", content: "Settings — Blogs" }, { property: "og:description", content: "Manage your Blogs author profile." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: Settings,
 });
 
@@ -42,8 +42,9 @@ function Settings() {
   }, [profile]);
 
   async function pick(file: File, which: "avatar" | "cover") {
+    if (!user) return;
     try {
-      const url = await uploadMedia(user!.id, file);
+      const url = await uploadMedia(user.id, file);
       which === "avatar" ? setAvatar(url) : setCover(url);
     } catch {
       toast.error("Upload failed");
@@ -52,10 +53,11 @@ function Settings() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (!user) return;
     const p = schema.safeParse(f);
     if (!p.success) return void toast.error(p.error.issues[0]?.message ?? "Invalid input");
     setBusy(true);
-    const { error } = await supabase.from("profiles").update({ ...p.data, avatar_url: avatar, cover_url: cover, website: p.data.website || null }).eq("id", user!.id);
+    const { error } = await supabase.from("profiles").update({ ...p.data, avatar_url: avatar, cover_url: cover, website: p.data.website || null }).eq("id", user.id);
     setBusy(false);
     if (error) return void toast.error(error.code === "23505" ? "That username is taken." : "Couldn't save your profile.");
     toast.success("Profile updated");
