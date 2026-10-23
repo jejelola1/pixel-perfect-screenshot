@@ -15,6 +15,13 @@
       "when": 1792763673954,
       "tag": "0001_secure_admin_role_management",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792764422867,
+      "tag": "0002_admin_site_branding",
+      "breakpoints": true
     }
   ]
 }
