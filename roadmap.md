@@ -1,5 +1,6 @@
 # Admin completion
-- [ ] Add admin site logo upload, site name and theme settings.
+- [x] Add admin site logo upload, site name and light/dark/system theme settings; unit tests pass.
+- [ ] Verify branding upload and save as the requesting administrator — blocked until their account exists and admin access is granted.
 - [ ] Identify the requesting user's account and grant admin access.
 - [x] Add protected, audited admin role changes and prevent self-demotion.
 - [x] Add comment moderation, tags, article statistics and checked editorial actions.
