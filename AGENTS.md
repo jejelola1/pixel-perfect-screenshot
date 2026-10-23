@@ -12,3 +12,4 @@
 Admin role changes must use the authenticated `set_admin_role` database function, not direct role writes, so permission checks, self-demotion protection and audit records cannot be bypassed.
 Signup creates ordinary users only; administrator bootstrap requires a verified requester identity to prevent first-signup privilege capture.
 Timed publication uses published status with a future published_at (and scheduled_for for admin visibility); public queries and RLS exclude future timestamps, so content becomes visible at its due time without a scheduler.
+Site identity is a singleton public-read/admin-write site_settings record; shared branding context drives logo, name, favicon and semantic light/dark theme tokens so saved settings apply across pages.

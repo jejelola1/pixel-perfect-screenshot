@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./logo";
 import { NewsletterForm } from "./newsletter";
+import { useBranding } from "@/lib/branding";
 
 export function SiteFooter() {
+  const { site_name } = useBranding();
   return (
     <footer className="mt-24 border-t bg-card">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
@@ -32,7 +34,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="mx-auto flex max-w-6xl justify-between px-4 py-5 text-xs text-muted-foreground sm:px-6">
-          <span>© {new Date().getFullYear()} Blogs</span>
+          <span>© {new Date().getFullYear()} {site_name}</span>
           <a href="/sitemap.xml" className="hover:text-foreground">Sitemap</a>
         </div>
       </div>

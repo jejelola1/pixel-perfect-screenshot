@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { slugify } from "@/lib/content";
 import { canChangeAdminRole, csvCell } from "@/lib/admin-rules";
 import { AdminTags, AdminAnalytics } from "@/components/blog/admin-extras";
+import { AdminBranding } from "@/components/blog/admin-branding";
 import { Forbidden } from "@/components/blog/forbidden";
 import { EmptyState } from "@/components/blog/empty-state";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ function Admin() {
       <p className="kicker">Editorial</p>
       <h1 className="font-display text-4xl font-semibold">Admin</h1>
       <Tabs defaultValue="review" className="mt-8">
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto flex-wrap justify-start">
           <TabsTrigger value="review">Review queue</TabsTrigger>
           <TabsTrigger value="articles">Articles</TabsTrigger>
           <TabsTrigger value="categories">Topics</TabsTrigger>
@@ -43,6 +44,7 @@ function Admin() {
           <TabsTrigger value="subs">Newsletter</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="branding">Site branding</TabsTrigger>
         </TabsList>
         <TabsContent value="review"><Articles statuses={["submitted", "under_review"]} review /></TabsContent>
         <TabsContent value="articles"><Articles statuses={["approved", "scheduled", "published", "archived", "draft", "rejected"]} /></TabsContent>
@@ -54,6 +56,7 @@ function Admin() {
         <TabsContent value="subs"><Subs /></TabsContent>
         <TabsContent value="audit"><Audit /></TabsContent>
         <TabsContent value="analytics"><AdminAnalytics /></TabsContent>
+        <TabsContent value="branding"><AdminBranding /></TabsContent>
       </Tabs>
     </div>
   );
