@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useBranding } from "@/lib/branding";
 
 export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
+  const { logo_url } = useBranding();
+  if (logo_url) return <img src={logo_url} alt="" className={`${className} object-contain`} />;
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
       <rect width="32" height="32" rx="7" className="fill-primary" />
@@ -14,10 +17,11 @@ export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
 }
 
 export function Logo() {
+  const { site_name } = useBranding();
   return (
-    <Link to="/" className="flex items-center gap-2" aria-label="Blogs home">
-      <LogoMark />
-      <span className="font-display text-xl font-semibold">Blogs</span>
+    <Link to="/" className="flex min-w-0 max-w-56 items-center gap-2" aria-label={`${site_name} home`}>
+      <LogoMark className="h-7 w-7 shrink-0" />
+      <span className="break-words font-display text-xl font-semibold leading-tight [overflow-wrap:anywhere]">{site_name}</span>
     </Link>
   );
 }

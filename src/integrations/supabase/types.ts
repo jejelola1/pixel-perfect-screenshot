@@ -472,6 +472,30 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          id: boolean
+          logo_url: string | null
+          site_name: string
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          logo_url?: string | null
+          site_name?: string
+          theme?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          logo_url?: string | null
+          site_name?: string
+          theme?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           created_at: string

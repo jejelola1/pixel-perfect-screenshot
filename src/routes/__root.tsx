@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/blog/site-header";
 import { SiteFooter } from "@/components/blog/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { BrandingProvider } from "@/lib/branding";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <AuthProvider>
+        <BrandingProvider>
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2">
           Skip to content
         </a>
@@ -141,6 +143,7 @@ function RootComponent() {
         </main>
         <SiteFooter />
         <Toaster />
+        </BrandingProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
