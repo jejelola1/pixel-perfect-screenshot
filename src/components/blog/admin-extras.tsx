@@ -51,7 +51,7 @@ export function AdminAnalytics() {
   if (isPending) return <p className="mt-6">Loading statistics…</p>;
   if (error || !data) return <p role="alert" className="mt-6 text-destructive">Couldn't load statistics.</p>;
   const published = data.articles.filter((a) => a.status === "published" && a.published_at && new Date(a.published_at) <= new Date());
-  const stats = [
+  const stats: [string, number][] = [
     ["Published articles", published.length],
     ["Article views", data.articles.reduce((sum, a) => sum + a.views, 0)],
     ["Accounts", data.accounts],
