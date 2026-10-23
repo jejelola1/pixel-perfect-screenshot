@@ -8,6 +8,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/lib/auth";
 import { slugify } from "@/lib/content";
 import { canChangeAdminRole, csvCell } from "@/lib/admin-rules";
+import { AdminTags, AdminAnalytics } from "@/components/blog/admin-extras";
 import { Forbidden } from "@/components/blog/forbidden";
 import { EmptyState } from "@/components/blog/empty-state";
 import { Button } from "@/components/ui/button";
@@ -35,20 +36,24 @@ function Admin() {
           <TabsTrigger value="review">Review queue</TabsTrigger>
           <TabsTrigger value="articles">Articles</TabsTrigger>
           <TabsTrigger value="categories">Topics</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
            <TabsTrigger value="comments">Comments</TabsTrigger>
           <TabsTrigger value="subs">Newsletter</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="review"><Articles statuses={["submitted", "under_review"]} review /></TabsContent>
         <TabsContent value="articles"><Articles statuses={["approved", "scheduled", "published", "archived", "draft", "rejected"]} /></TabsContent>
         <TabsContent value="categories"><Categories /></TabsContent>
+        <TabsContent value="tags"><AdminTags /></TabsContent>
         <TabsContent value="users"><Users /></TabsContent>
         <TabsContent value="reports"><Reports /></TabsContent>
         <TabsContent value="comments"><ModerateComments /></TabsContent>
         <TabsContent value="subs"><Subs /></TabsContent>
         <TabsContent value="audit"><Audit /></TabsContent>
+        <TabsContent value="analytics"><AdminAnalytics /></TabsContent>
       </Tabs>
     </div>
   );
