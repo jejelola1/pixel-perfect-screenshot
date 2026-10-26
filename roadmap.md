@@ -1,4 +1,5 @@
 # Admin completion
+- [ ] Improve everyday UI: clear navigation, focused writing controls, accessible formatting, and small-screen layouts; verify with a signed-in session.
 - [x] Add admin site logo upload, site name and light/dark/system theme settings; unit tests pass.
 - [ ] Verify branding upload and save as the requesting administrator — blocked until their account exists and admin access is granted.
 - [ ] Identify the requesting user's account and grant admin access.
