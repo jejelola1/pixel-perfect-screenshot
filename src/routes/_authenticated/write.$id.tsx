@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import {
   ArrowLeft, Bold, Code, Eye, Heading2, History, ImagePlus, Italic, Link2, List, ListOrdered,
-  Loader2, Minus, Quote, Send, Sigma, Table, Upload, CalendarClock, Info,
+  Loader2, Minus, Quote, Send, Sigma, Table, Upload, CalendarClock, Info, Check, Save, SlidersHorizontal, PenLine,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { StatusBadge } from "./dashboard";
 
 export const Route = createFileRoute("/_authenticated/write/$id")({
@@ -59,6 +61,7 @@ function Editor() {
   const [d, setD] = useState<Draft | null>(null);
   const [tags, setTags] = useState("");
   const [preview, setPreview] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "dirty" | "saving">("saved");
   const [busy, setBusy] = useState(false);
   const [schedule, setSchedule] = useState("");
@@ -222,17 +225,18 @@ function Editor() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+    <TooltipProvider delayDuration={250}>
+    <div className="mx-auto max-w-6xl px-4 pb-10 sm:px-6">
       <div className="sticky top-16 z-30 -mx-4 flex flex-wrap items-center gap-2 border-b bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
-        <Button asChild variant="ghost" size="sm"><Link to="/dashboard"><ArrowLeft /> Back</Link></Button>
+        <Button asChild variant="ghost" size="icon" className="h-9 w-9 shrink-0" title="Back to your stories"><Link to="/dashboard" aria-label="Back to your stories"><ArrowLeft /></Link></Button>
         <StatusBadge status={article.status} publishedAt={article.published_at} />
-        <span className="text-xs text-muted-foreground" aria-live="polite">
-          {saveState === "saving" ? "Saving…" : saveState === "dirty" ? "Unsaved changes" : "All changes saved"}
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
+          {saveState === "saving" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saveState === "saved" ? <Check className="h-3.5 w-3.5 text-success" /> : <span className="h-1.5 w-1.5 rounded-full bg-warning" />}
+          {saveState === "saving" ? "Saving…" : saveState === "dirty" ? "Unsaved" : "Saved"}
         </span>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setPreview(!preview)} aria-pressed={preview}><Eye /> {preview ? "Edit" : "Preview"}</Button>
+        <div className="ml-auto flex items-center gap-1.5">
           <VersionHistory articleId={id} onRestore={(v) => set({ title: v.title, content: v.content })} />
-          {editable && <Button variant="outline" size="sm" onClick={() => save({ version: true }).then((ok) => ok && toast.success("Version saved"))}>Save version</Button>}
+          {editable && <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Save version" disabled={saveState === "saving" || busy} onClick={() => save({ version: true }).then((ok) => ok && toast.success("Version saved"))}><Save /></Button></TooltipTrigger><TooltipContent>Save version</TooltipContent></Tooltip>}
           {isAdmin ? (
             <>
               <SchedulePopover value={schedule} onChange={setSchedule} onConfirm={() => schedule && publish(schedule)} />
@@ -246,6 +250,15 @@ function Editor() {
         </div>
       </div>
 
+      <div className="flex items-center justify-between gap-3 border-b py-3">
+        <ToggleGroup type="single" value={preview ? "preview" : "write"} onValueChange={(value) => { if (value) setPreview(value === "preview"); }} className="justify-start rounded-md bg-muted p-1" aria-label="Editor view">
+          <ToggleGroupItem value="write" className="h-8 gap-2 px-3 data-[state=on]:bg-card data-[state=on]:text-foreground" aria-label="Write"><PenLine className="h-4 w-4" />Write</ToggleGroupItem>
+          <ToggleGroupItem value="preview" className="h-8 gap-2 px-3 data-[state=on]:bg-card data-[state=on]:text-foreground" aria-label="Preview"><Eye className="h-4 w-4" />Preview</ToggleGroupItem>
+        </ToggleGroup>
+        <span className="hidden text-xs text-muted-foreground lg:block">{words.toLocaleString()} words · {readingMinutes(d.content)} min read</span>
+        <Button variant={settingsOpen ? "secondary" : "outline"} size="sm" className="lg:hidden" onClick={() => setSettingsOpen(!settingsOpen)} aria-expanded={settingsOpen} aria-controls="story-settings"><SlidersHorizontal />Story settings</Button>
+      </div>
+
       {!editable && (
         <p className="mt-4 rounded-md border bg-card px-4 py-3 text-sm">This story is {article.status.replace("_", " ")} and locked for editing. Contact an editor to request changes.</p>
       )}
@@ -253,12 +266,12 @@ function Editor() {
         <p className="mt-4 rounded-md border bg-card px-4 py-3 text-sm">Submitted — an editor will review it soon. You can still make edits.</p>
       )}
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="mx-auto w-full max-w-[720px]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="order-2 mx-auto min-w-0 w-full max-w-[720px] lg:order-1">
           {preview ? (
             <article>
               {d.cover_url && <img src={d.cover_url} alt="" className="mb-8 aspect-[2/1] w-full rounded-lg object-cover" />}
-              <h1 className="font-display text-5xl font-semibold leading-tight">{d.title || "Untitled"}</h1>
+              <h1 className="break-words font-display text-4xl font-semibold leading-tight sm:text-5xl">{d.title || "Untitled"}</h1>
               {d.subtitle && <p className="mt-4 font-serif text-2xl text-muted-foreground">{d.subtitle}</p>}
               <div className="mt-8"><Markdown source={d.content} /></div>
             </article>
@@ -270,7 +283,7 @@ function Editor() {
                   <Button size="sm" variant="secondary" className="absolute right-3 top-3" onClick={() => set({ cover_url: null })}>Remove cover</Button>
                 </div>
               ) : (
-                <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-card py-3 text-sm text-muted-foreground transition-colors hover:border-ring hover:text-foreground">
                   <ImagePlus className="h-4 w-4" /> Add a cover image
                   <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], true)} />
                 </label>
@@ -278,10 +291,10 @@ function Editor() {
               <textarea
                 value={d.title}
                 onChange={(e) => set({ title: e.target.value.replace(/\n/g, "") })}
-                placeholder="Title"
+                placeholder="Story title"
                 rows={1}
                 aria-label="Title"
-                className="w-full resize-none bg-transparent font-display text-4xl font-semibold leading-tight outline-none placeholder:text-border sm:text-5xl [field-sizing:content]"
+                className="w-full resize-none bg-transparent font-display text-4xl font-semibold leading-tight outline-none placeholder:text-muted-foreground sm:text-5xl [field-sizing:content]"
               />
               <textarea
                 value={d.subtitle}
@@ -289,13 +302,13 @@ function Editor() {
                 placeholder="Add a subtitle…"
                 rows={1}
                 aria-label="Subtitle"
-                className="w-full resize-none bg-transparent font-serif text-xl text-muted-foreground outline-none placeholder:text-border [field-sizing:content]"
+                className="w-full resize-none bg-transparent font-serif text-xl text-muted-foreground outline-none placeholder:text-muted-foreground [field-sizing:content]"
               />
               <div className="flex flex-wrap gap-0.5 rounded-md border bg-card p-1" role="toolbar" aria-label="Formatting">
                 {tools.map(([Icon, label, fn]) => (
-                  <Button key={label} type="button" title={label} aria-label={label} onClick={fn} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                  <Tooltip key={label}><TooltipTrigger asChild><Button type="button" aria-label={label} onClick={fn} variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
                     <Icon className="h-4 w-4" />
-                  </Button>
+                  </Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip>
                 ))}
                 <label title="Upload image" className="cursor-pointer rounded p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
                   <Upload className="h-4 w-4" />
@@ -320,7 +333,7 @@ function Editor() {
                     upload(f);
                   }
                 }}
-                placeholder={"Tell your story…\n\nWrite in Markdown. Drop images anywhere to upload them."}
+                placeholder="Tell your story…"
                 aria-label="Story content"
                 className="min-h-[60vh] w-full resize-none bg-transparent font-serif text-lg leading-relaxed outline-none placeholder:text-muted-foreground/60 [field-sizing:content]"
               />
@@ -328,7 +341,8 @@ function Editor() {
           )}
         </div>
 
-        <aside className="space-y-6 text-sm lg:sticky lg:top-36 lg:self-start">
+        <aside id="story-settings" className={`${settingsOpen ? "block" : "hidden"} order-1 space-y-5 border-b pb-6 text-sm lg:order-2 lg:sticky lg:top-36 lg:block lg:self-start lg:border-b-0 lg:border-l lg:pb-0 lg:pl-6`}>
+          <h2 className="font-medium">Story settings</h2>
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border bg-border text-center">
             <Stat label="Words" value={words} />
             <Stat label="Chars" value={d.content.length} />
@@ -350,7 +364,7 @@ function Editor() {
             <div className="space-y-1.5">
               <Label htmlFor="slug">URL</Label>
               <div className="flex items-center rounded-md border bg-card pl-2 text-xs text-muted-foreground">
-                /a/<input id="slug" value={d.slug} onChange={(e) => set({ slug: e.target.value })} onBlur={() => set({ slug: slugify(d.slug || d.title) })} className="h-9 flex-1 bg-transparent px-1 text-sm text-foreground outline-none" />
+                /a/<input id="slug" value={d.slug} onChange={(e) => set({ slug: e.target.value })} onBlur={() => set({ slug: slugify(d.slug || d.title) })} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-sm text-foreground outline-none" />
               </div>
               <Button type="button" variant="link" size="sm" onClick={() => set({ slug: slugify(d.title) })} className="h-auto p-0 text-xs">Generate from title</Button>
             </div>
@@ -370,15 +384,10 @@ function Editor() {
               <Switch checked={d.comments_enabled} onCheckedChange={(v) => set({ comments_enabled: v })} />
             </label>
           </fieldset>
-          <details className="rounded-md border bg-card p-3 text-xs text-muted-foreground">
-            <summary className="cursor-pointer font-medium text-foreground">Formatting guide</summary>
-            <ul className="mt-2 space-y-1 font-mono">
-              <li>## Heading</li><li>**bold** _italic_</li><li>$x^2$ inline math</li><li>$$ block math $$</li><li>Footnote[^1] … [^1]: note</li><li>&gt; [!NOTE] callout</li><li>YouTube link on its own line = embed</li>
-            </ul>
-          </details>
         </aside>
       </div>
     </div>
+    </TooltipProvider>
   );
 }
 
@@ -415,9 +424,9 @@ function VersionHistory({ articleId, onRestore }: { articleId: string; onRestore
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm"><History /> History</Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Version history" title="Version history"><History /></Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto" aria-describedby={undefined}>
         <SheetHeader><SheetTitle>Version history</SheetTitle></SheetHeader>
         <ul className="mt-4 space-y-2 px-4">
           {data.length === 0 && <li className="text-sm text-muted-foreground">Versions are saved when you click “Save version”, submit, or publish.</li>}

@@ -145,14 +145,14 @@
 @utility font-display {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 @utility kicker {
   font-family: var(--font-sans);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -167,7 +167,7 @@
   line-height: 1.75;
   color: var(--foreground);
   & > * + * { margin-top: 1.25em; }
-  & h2 { font-family: var(--font-display); font-size: 1.85rem; line-height: 1.2; margin-top: 2em; font-weight: 600; letter-spacing: -0.02em; scroll-margin-top: 6rem; }
+  & h2 { font-family: var(--font-display); font-size: 1.85rem; line-height: 1.2; margin-top: 2em; font-weight: 600; letter-spacing: 0; scroll-margin-top: 6rem; }
   & h3 { font-family: var(--font-display); font-size: 1.4rem; margin-top: 1.6em; font-weight: 600; scroll-margin-top: 6rem; }
   & a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
   & ul { list-style: disc; padding-left: 1.4em; }
@@ -198,4 +198,8 @@
 }
 @utility animate-rise {
   animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

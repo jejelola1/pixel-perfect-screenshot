@@ -23,8 +23,8 @@ export function Listing({
         <h1 className="font-display text-4xl font-semibold sm:text-6xl">{title}</h1>
         {description && <p className="mt-4 max-w-2xl font-serif text-xl text-muted-foreground">{description}</p>}
       </header>
-      <div className="grid gap-12 py-6 lg:grid-cols-[1.6fr_1fr]">
-        <div>
+      <div className={`grid gap-12 py-6 ${aside ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : ""}`}>
+        <div className="min-w-0">
           {articles.length ? (
             articles.map((a) => <ArticleRow key={a.id} a={a} />)
           ) : (
