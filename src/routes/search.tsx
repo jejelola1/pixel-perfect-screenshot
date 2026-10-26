@@ -2,11 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { publishedQuery, type ArticleCard } from "@/lib/content";
 import { ArticleRow } from "@/components/blog/article-card";
 import { EmptyState } from "@/components/blog/empty-state";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   q: z.string().catch(""),
@@ -64,7 +65,8 @@ function SearchPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-4xl font-semibold">Search</h1>
+      <p className="kicker mb-2">Discover</p>
+      <h1 className="font-display text-4xl font-semibold">Explore stories</h1>
       <div className="mt-6 flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-card focus-within:border-ring">
         <SearchIcon className="h-5 w-5 text-muted-foreground" />
         <input
@@ -73,25 +75,27 @@ function SearchPage() {
           onChange={(e) => setText(e.target.value)}
           placeholder="Search titles, ideas, people…"
           aria-label="Search"
-          className="w-full bg-transparent text-lg outline-none"
+          className="min-w-0 w-full bg-transparent text-lg outline-none"
         />
+        {text && <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="Clear search" onClick={() => setText("")}><X /></Button>}
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-        <button onClick={() => navigate({ search: (p) => ({ ...p, category: undefined }) })} className={`rounded-full border px-3 py-1 ${!s.category ? "border-foreground bg-foreground text-background" : "bg-card"}`}>All</button>
+        <Button size="sm" variant={!s.category ? "default" : "outline"} aria-pressed={!s.category} onClick={() => navigate({ search: (p) => ({ ...p, category: undefined }) })}>All topics</Button>
         {cats.map((c) => (
-          <button key={c.id} onClick={() => navigate({ search: (p) => ({ ...p, category: c.slug }) })} className={`rounded-full border px-3 py-1 ${s.category === c.slug ? "border-foreground bg-foreground text-background" : "bg-card"}`}>{c.name}</button>
+          <Button key={c.id} size="sm" variant={s.category === c.slug ? "default" : "outline"} aria-pressed={s.category === c.slug} onClick={() => navigate({ search: (p) => ({ ...p, category: c.slug }) })}>{c.name}</Button>
         ))}
         <select
           aria-label="Sort"
           value={s.sort ?? "newest"}
           onChange={(e) => navigate({ search: (p) => ({ ...p, sort: e.target.value as "newest" | "popular" }) })}
-          className="ml-auto rounded-md border bg-card px-2 py-1"
+          className="ml-auto h-9 rounded-md border bg-card px-2"
         >
           <option value="newest">Newest</option>
           <option value="popular">Most read</option>
         </select>
       </div>
-      <div className={`mt-6 transition-opacity ${isFetching ? "opacity-60" : ""}`}>
+      <p role="status" className="mt-6 flex min-h-5 items-center gap-2 border-b pb-4 text-sm text-muted-foreground">{isFetching ? <><Loader2 className="h-4 w-4 animate-spin" />Finding stories…</> : `${data.length === 40 ? "40+" : data.length} ${data.length === 1 ? "story" : "stories"}${s.q ? ` matching “${s.q}”` : ""}`}</p>
+      <div aria-busy={isFetching} className={`mt-2 transition-opacity ${isFetching ? "opacity-60" : ""}`}>
         {data.length ? data.map((a) => <ArticleRow key={a.id} a={a} />) : !isFetching && (
           <EmptyState title="No matching stories" body={s.q ? `Nothing matched “${s.q}”. Try fewer or different words.` : "No stories have been published yet."} />
         )}

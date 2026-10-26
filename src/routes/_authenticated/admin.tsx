@@ -33,7 +33,7 @@ function Admin() {
       <p className="kicker">Editorial</p>
       <h1 className="font-display text-4xl font-semibold">Admin</h1>
       <Tabs defaultValue="review" className="mt-8">
-        <TabsList className="h-auto flex-wrap justify-start">
+        <TabsList className="h-auto max-w-full flex-wrap justify-start gap-1">
           <TabsTrigger value="review">Review queue</TabsTrigger>
           <TabsTrigger value="articles">Articles</TabsTrigger>
           <TabsTrigger value="categories">Topics</TabsTrigger>

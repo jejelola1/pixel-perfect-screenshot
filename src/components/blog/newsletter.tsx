@@ -41,7 +41,7 @@ export function NewsletterForm({ compact = false }: { compact?: boolean }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
-        className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-ring"
+        className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-ring"
       />
       <Button type="submit" variant={compact ? "default" : "accent"} className="h-10" disabled={state === "loading"}>
         {state === "loading" && <Loader2 className="animate-spin" />} Subscribe
